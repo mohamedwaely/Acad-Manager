@@ -283,42 +283,42 @@ async def login(login_data: schemas.LoginRequest, db: Session = Depends(get_db))
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-# @router.post("/v1/add-supervisor", response_model=schemas.SupervisorDBBase)
-# async def add_supervisor(supervisor_data: schemas.Supervisor, cur_admin: schemas.AdminDB = Depends(auth.getCurrentAdmin), db: Session = Depends(get_db)):
-#     if cur_admin.degree != 'A':
-#         raise HTTPException(status_code=403, detail="Only admins with degree A can add supervisors")
+@router.post("/v1/add-supervisor", response_model=schemas.SupervisorDBBase)
+async def add_supervisor(supervisor_data: schemas.Supervisor, cur_admin: schemas.AdminDB = Depends(auth.getCurrentAdmin), db: Session = Depends(get_db)):
+    if cur_admin.degree != 'A':
+        raise HTTPException(status_code=403, detail="Only admins with degree A can add supervisors")
     
-#     existing_user = auth.getUser(db, email=supervisor_data.email)
-#     existing_admin = auth.getAdmin(db, email=supervisor_data.email)
-#     existing_supervisor = auth.getSupervisor(db, email=supervisor_data.email)
-#     if existing_user or existing_admin or existing_supervisor:
-#         raise HTTPException(status_code=400, detail="Email already exists")
+    existing_user = auth.getUser(db, email=supervisor_data.email)
+    existing_admin = auth.getAdmin(db, email=supervisor_data.email)
+    existing_supervisor = auth.getSupervisor(db, email=supervisor_data.email)
+    if existing_user or existing_admin or existing_supervisor:
+        raise HTTPException(status_code=400, detail="Email already exists")
     
-#     hashed_password = security.getHashedPassword(supervisor_data.password)
+    hashed_password = security.getHashedPassword(supervisor_data.password)
     
-#     new_supervisor = models.Supervisors(
-#         username=supervisor_data.email,
-#         email=supervisor_data.email,
-#         hashed_password=hashed_password,
-#         firstName=supervisor_data.firstName,
-#         lastName=supervisor_data.lastName,
-#         university=supervisor_data.university,
-#         department=supervisor_data.department
-#     )
+    new_supervisor = models.Supervisors(
+        username=supervisor_data.email,
+        email=supervisor_data.email,
+        hashed_password=hashed_password,
+        firstName=supervisor_data.firstName,
+        lastName=supervisor_data.lastName,
+        university=supervisor_data.university,
+        department=supervisor_data.department
+    )
     
-#     try:
-#         db.add(new_supervisor)
-#         db.commit()
-#         db.refresh(new_supervisor)
-#         return new_supervisor
-#     except IntegrityError as e:
-#         db.rollback()
-#         logger.error(f"Database integrity error: {str(e)}")
-#         raise HTTPException(status_code=400, detail="Supervisor creation failed due to duplicate username or email")
-#     except Exception as e:
-#         db.rollback()
-#         logger.error(f"Unexpected error: {str(e)}")
-#         raise HTTPException(status_code=500, detail=f"Failed to add supervisor: {str(e)}")
+    try:
+        db.add(new_supervisor)
+        db.commit()
+        db.refresh(new_supervisor)
+        return new_supervisor
+    except IntegrityError as e:
+        db.rollback()
+        logger.error(f"Database integrity error: {str(e)}")
+        raise HTTPException(status_code=400, detail="Supervisor creation failed due to duplicate username or email")
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Unexpected error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to add supervisor: {str(e)}")
 
 #################################################################33
 ####################################################################
@@ -585,111 +585,118 @@ async def create_team(team: schemas.TeamBase, cur_user: schemas.UserDB = Depends
         raise HTTPException(status_code=500, detail=f"Failed to create team: {str(e)}")
 
 
-# @router.get("/v1/college-ideas/{title}", response_model=schemas.CollegeIdeaResponse)
-# @router.get("/v1/college-ideas", response_model=list[schemas.CollegeIdeaResponse])
-# async def college_idea(title: Optional[str] = None, db: Session = Depends(get_db)):
-#     try:
-#         query = db.query(
-#             models.CollegeIdeas.title,
-#             models.CollegeIdeas.description,
-#             models.CollegeIdeas.year,
-#             models.CollegeIdeas.status,
-#             models.Supervisors.id,
-#             models.Supervisors.firstName,
-#             models.Supervisors.lastName,
-#             models.Supervisors.username,
-#             models.Supervisors.email,
-#             models.Supervisors.university,
-#             models.Supervisors.department
-#         ).join(
-#             models.Supervisors,
-#             models.CollegeIdeas.supervisor_username == models.Supervisors.username
-#         )
+@router.get("/v1/college-ideas/{title}", response_model=schemas.CollegeIdeaResponse)
+@router.get("/v1/college-ideas", response_model=list[schemas.CollegeIdeaResponse])
+async def college_idea(title: Optional[str] = None, db: Session = Depends(get_db)):
+    try:
+        query = db.query(
+            models.CollegeIdeas.title,
+            models.CollegeIdeas.description,
+            models.CollegeIdeas.year,
+            models.CollegeIdeas.status,
+            models.Supervisors.id,
+            models.Supervisors.firstName,
+            models.Supervisors.lastName,
+            models.Supervisors.username,
+            models.Supervisors.email,
+            models.Supervisors.university,
+            models.Supervisors.department
+        ).join(
+            models.Supervisors,
+            models.CollegeIdeas.supervisor_email == models.Supervisors.email
+        )
 
-#         def map_idea(idea):
-#             return {
-#                 "title": idea.title,
-#                 "description": idea.description,
-#                 "year": idea.year,
-#                 "status": idea.status,
-#                 "supervisor_info": {
-#                     "id": idea.id,
-#                     "firstName": idea.firstName,
-#                     "lastName": idea.lastName,
-#                     "username": idea.username,
-#                     "email": idea.email,
-#                     "university": idea.university,
-#                     "department": idea.department
-#                 }
-#             }
+        def map_idea(idea):
+            return {
+                "title": idea.title,
+                "description": idea.description,
+                "year": idea.year,
+                "status": idea.status,
+                "supervisor_info": {
+                    "id": idea.id,
+                    "firstName": idea.firstName,
+                    "lastName": idea.lastName,
+                    "username": idea.username,
+                    "email": idea.email,
+                    "university": idea.university,
+                    "department": idea.department
+                }
+            }
 
-#         if title is None:
-#             ideas = query.all()
-#             return [map_idea(idea) for idea in ideas]
-#         else:
-#             idea = query.filter(models.CollegeIdeas.title == title).first()
-#             if idea is None:
-#                 raise HTTPException(status_code=404, detail=f"College idea with title '{title}' not found")
-#             return map_idea(idea)
-#     except Exception as e:
-#         logger.error(f"Unexpected error: {str(e)}")
-#         raise HTTPException(status_code=500, detail=f"Failed to retrieve college ideas: {str(e)}")
+        if title is None:
+            ideas = query.all()
+            return [map_idea(idea) for idea in ideas]
+        else:
+            idea = query.filter(models.CollegeIdeas.title == title).first()
+            if idea is None:
+                raise HTTPException(status_code=404, detail=f"College idea with title '{title}' not found")
+            return map_idea(idea)
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve college ideas: {str(e)}")
 
-# @router.post("/v1/student/college-idea-request", response_model=schemas.CollegeIdeaRequestResponse)
-# async def create_college_idea_request(
-#     request: schemas.CollegeIdeaRequestBase,
-#     cur_user: schemas.UserDB = Depends(auth.getCurrentUser),
-#     db: Session = Depends(get_db)
-# ):
-#     try:
-#         # Authenticate user and check if they are a team leader
-#         team_member = db.query(models.TeamMember).filter(models.TeamMember.username == cur_user.username).first()
-#         if not team_member:
-#             raise HTTPException(status_code=403, detail="User is not a member of any team")
-#         if not team_member.is_leader:
-#             raise HTTPException(status_code=403, detail="Only team leaders can request college ideas")
+@router.post("/v1/student/college-idea-request", response_model=schemas.CollegeIdeaRequestResponse)
+async def create_college_idea_request(
+    request: schemas.CollegeIdeaRequestBase,
+    cur_user: schemas.UserDB = Depends(auth.getCurrentUser),
+    db: Session = Depends(get_db)
+):
+    try:
+        # Authenticate user and check if they are a team leader
+        team_member = db.query(models.TeamMember).filter(models.TeamMember.user_email == cur_user.email).first()
+        if not team_member:
+            raise HTTPException(status_code=403, detail="User is not a member of any team")
+        if not team_member.is_leader:
+            raise HTTPException(status_code=403, detail="Only team leaders can request college ideas")
 
-#         # Fetch college idea
-#         college_idea = db.query(models.CollegeIdeas).filter(models.CollegeIdeas.title == request.college_idea_title).first()
-#         if not college_idea:
-#             raise HTTPException(status_code=404, detail=f"College idea with title '{request.college_idea_title}' not found")
+        # Fetch college idea
+        college_idea = db.query(models.CollegeIdeas).filter(models.CollegeIdeas.title == request.college_idea_title).first()
+        if not college_idea:
+            raise HTTPException(status_code=404, detail=f"College idea with title '{request.college_idea_title}' not found")
 
-#         # Validate supervisor existence
-#         supervisor = db.query(models.Supervisors).filter(models.Supervisors.username == college_idea.supervisor_username).first()
-#         if not supervisor:
-#             raise HTTPException(status_code=400, detail="Supervisor associated with the college idea does not exist")
+        # Validate supervisor existence
+        supervisor = db.query(models.Supervisors).filter(models.Supervisors.email == college_idea.supervisor_email).first()
+        if not supervisor:
+            raise HTTPException(status_code=400, detail="Supervisor associated with the college idea does not exist")
 
-#         # Check for existing requests
-#         existing_request = db.query(models.CollegeIdeasRequests).filter(
-#             models.CollegeIdeasRequests.team_id == team_member.team_id,
-#             models.CollegeIdeasRequests.college_idea_title == request.college_idea_title
-#         ).first()
-#         if existing_request:
-#             if existing_request.status == reqStatus.PENDING:
-#                 raise HTTPException(status_code=400, detail="Team has already requested this idea")
-#             elif existing_request.status == reqStatus.ACCEPTED:
-#                 raise HTTPException(status_code=400, detail="Team has already been accepted for this idea")
+        # Check for existing requests
+        existing_request = db.query(models.CollegeIdeasRequests).filter(
+            models.CollegeIdeasRequests.team_id == team_member.team_id,
+            models.CollegeIdeasRequests.college_idea_title == request.college_idea_title
+        ).first()
+        if existing_request:
+            if existing_request.status == reqStatus.PENDING:
+                raise HTTPException(status_code=400, detail="Team has already requested this idea")
+            elif existing_request.status == reqStatus.ACCEPTED:
+                raise HTTPException(status_code=400, detail="Team has already been accepted for this idea")
 
-#         # Create request
-#         req = models.CollegeIdeasRequests(
-#             team_id=team_member.team_id,
-#             college_idea_title=request.college_idea_title,
-#             status=reqStatus.PENDING,
-#             supervisor_username=college_idea.supervisor_username
-#         )
-#         db.add(req)
-#         db.commit()
-#         db.refresh(req)
-#         return req
+        # Create request
+        req = models.CollegeIdeasRequests(
+            team_id=team_member.team_id,
+            college_idea_title=request.college_idea_title,
+            status=reqStatus.PENDING,
+            supervisor_email=college_idea.supervisor_email
+        )
+        db.add(req)
+        db.commit()
+        db.refresh(req)
+        res=models.CollegeIdeasRequests(
+            team_id=team_member.team_id,
+            college_idea_title=request.college_idea_title,
+            status=reqStatus.PENDING,
+            supervisor_username=supervisor.username
+        )
+        return res
 
-#     except IntegrityError as e:
-#         db.rollback()
-#         logger.error(f"Database integrity error: {str(e)}")
-#         raise HTTPException(status_code=400, detail="Request creation failed due to database constraint")
-#     except Exception as e:
-#         db.rollback()
-#         logger.error(f"Unexpected error: {str(e)}")
-#         raise HTTPException(status_code=500, detail=f"Failed to create request: {str(e)}")
+    except IntegrityError as e:
+        db.rollback()
+        logger.error(f"Database integrity error: {str(e)}")
+        raise HTTPException(status_code=400, detail="Request creation failed due to database constraint")
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Unexpected error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create request: {str(e)}")
+
 
 # @router.get("/v1/team-projects/{title}", response_model=schemas.TeamProjectResponse)
 # async def get_team_project_by_title(
