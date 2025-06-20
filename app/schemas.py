@@ -277,8 +277,8 @@ class RecommendedTeam(BaseModel):
     name: str
     description: str
     skills: List[str]
-
     similarity_score: float
+    
     class Config:
         from_attributes = True
 

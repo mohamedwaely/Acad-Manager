@@ -135,8 +135,8 @@ async def recommend_teams(cur_user: schemas.UserDB = Depends(auth.getCurrentUser
             recommended_teams.append(
                 schemas.RecommendedTeam(
                     team_id=team.id,
-                    team_name=team.name,
-                    team_description=team.description,
+                    name=team.name,
+                    description=team.description,
                     skills = team.expec_tools,
                     similarity_score=match["similarity_score"]
                 )
