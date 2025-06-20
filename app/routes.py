@@ -693,7 +693,7 @@ async def get_project_by_id(id: int, db: Session = Depends(get_db)):
 
 
 
-@router.get("/v1/archive/{title}", response_model=schemas.ProjectsResponse)
+@router.get("/v1/archivet/{title}", response_model=schemas.ProjectsResponse)
 @router.get("/v1/archive", response_model=list[schemas.ProjectsResponse])
 async def get_projects(title: Optional[str] = None, db: Session = Depends(get_db)):
     try:
@@ -905,7 +905,7 @@ async def college_idea_by_id(id: int, db: Session = Depends(get_db)):
         logger.error(f"Unexpected error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to retrieve college ideas: {str(e)}")
 
-@router.get("/v1/college-ideas/{title}", response_model=schemas.CollegeIdeaResponse)
+@router.get("/v1/college-idea/{title}", response_model=schemas.CollegeIdeaResponse)
 @router.get("/v1/college-ideas", response_model=list[schemas.CollegeIdeaResponse])
 async def college_idea(title: Optional[str] = None, db: Session = Depends(get_db)):
     try:
