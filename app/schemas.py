@@ -21,12 +21,6 @@ class Supervisor(BaseModel):
             raise ValueError('Username must be at least 3 characters long')
         return v
 
-    @validator('password')
-    def password_strength(cls, v):
-        if len(v) < 8:
-            raise ValueError('Password must be at least 8 characters long')
-        return v
-
     @validator('firstName', 'lastName')
     def name_valid(cls, v):
         if not v.replace(' ', '').isalpha():
@@ -95,11 +89,6 @@ class User(UserBase):
             raise ValueError('Username must be at least 3 characters long')
         return v
 
-    @validator('password')
-    def password_strength(cls, v):
-        if len(v) < 8:
-            raise ValueError('Password must be at least 8 characters long')
-        return v
 
 class Admin(BaseModel):
     username: str
@@ -113,12 +102,6 @@ class Admin(BaseModel):
             raise ValueError('Username must be alphanumeric')
         if len(v) < 3:
             raise ValueError('Username must be at least 3 characters long')
-        return v
-
-    @validator('password')
-    def password_strength(cls, v):
-        if len(v) < 8:
-            raise ValueError('Password must be at least 8 characters long')
         return v
 
     @validator('degree')
