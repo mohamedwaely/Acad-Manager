@@ -400,8 +400,6 @@ async def add_supervisor(supervisor_data: schemas.Supervisor, cur_admin: schemas
         logger.error(f"Unexpected error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to add supervisor: {str(e)}")
 
-#################################################################33
-####################################################################
 
 @router.post("/v1/master/add-admin", response_model=schemas.AdminDBBase)
 async def add_admin(admin_data: schemas.Admin, db: Session = Depends(get_db)):
@@ -500,6 +498,156 @@ async def add_admin(admin_data: schemas.Admin, db: Session = Depends(get_db)):
 #     except Exception as e:
 #         logger.error(f"Unexpected error: {str(e)}")
 #         raise HTTPException(status_code=500, detail=f"Failed to get admins: {str(e)}")
+
+@router.get("/v1/team-ideas", response_model=List[schemas.TeamProjectsResponse])
+async def get_teams(
+    current_user: Union[schemas.UserDB, schemas.AdminDB, schemas.SupervisorDB] = Depends(auth.get_current_any_user),
+    db: Session = Depends(get_db)
+):
+    try:
+        team_projects = db.query(models.TeamProject).all()
+        
+        if not team_projects:
+            return []
+        
+        response = []
+        
+        for team_project in team_projects:
+            team = db.query(models.Team).filter(
+                models.Team.id == team_project.team_id
+            ).first()
+            if not team:
+                continue  # Skip if team not found rather than raising error
+                
+            response.append(
+                schemas.TeamProjectsResponse(
+                    team_project_id=team_project.id,  # Use team_project.id instead of team.id
+                    title=team_project.title,
+                    status=team_project.status,
+                )
+            )
+            
+        return response
+        
+    except Exception as e:
+        logger.error(f"Unexpected error in get_team_project_by_title: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Failed to retrieve team project: {str(e)}"
+        )
+
+
+@router.get("/v1/team-ideas/{title}", response_model=schemas.TeamProjectResponse)
+async def get_team_project_by_title(
+    title: str,
+    current_user: Union[schemas.UserDB, schemas.AdminDB, schemas.SupervisorDB] = Depends(auth.get_current_any_user),
+    db: Session = Depends(get_db)
+):
+    try:
+        # First, find the team project
+        team_project = db.query(models.TeamProject).filter(
+            models.TeamProject.title == title
+        ).first()
+        
+        if not team_project:
+            raise HTTPException(
+                status_code=404, 
+                detail=f"Team project with title '{title}' not found"
+            )
+        
+        # Get team information
+        team = db.query(models.Team).filter(
+            models.Team.id == team_project.team_id
+        ).first()
+        
+        if not team:
+            raise HTTPException(
+                status_code=404, 
+                detail="Team associated with this project not found"
+            )
+        
+        # Get supervisor information through college ideas requests
+        supervisor_info = None
+        college_request = db.query(models.CollegeIdeasRequests).filter(
+            models.CollegeIdeasRequests.team_id == team.id,
+            models.CollegeIdeasRequests.status != reqStatus.REJECTED
+        ).first()
+        
+        if college_request:
+            supervisor_info = db.query(models.Supervisors).filter(
+                models.Supervisors.email == college_request.supervisor_email
+            ).first()
+        
+        # Get team members with their user details
+        team_members_query = db.query(
+            models.TeamMember,
+            models.User
+        ).join(
+            models.User,
+            models.TeamMember.user_email == models.User.email
+        ).filter(
+            models.TeamMember.team_id == team.id
+        ).all()
+        
+        # Build team members list
+        team_members = []
+        for team_member, user in team_members_query:
+            team_members.append(
+                schemas.TeamMemberDetailed(
+                    firstName=user.firstName,
+                    lastName=user.lastName,
+                    email=user.email,
+                    title=user.title,
+                    is_leader=team_member.is_leader,
+                    joined_at=team_member.joined_at
+                )
+            )
+        
+        # Build project details
+        project_details = {
+            "id": team_project.id,
+            "title": team_project.title,
+            "description": team_project.description,
+            "year": team_project.year,
+            "maxSimScore": team_project.maxSimScore,
+            "status": team_project.status.value if team_project.status else None,
+            "created_at": team_project.created_at
+        }
+        
+        # Build supervisor response if available
+        supervisor_response = None
+        if supervisor_info:
+            supervisor_response = schemas.SupervisorResponse(
+                id=supervisor_info.id,
+                firstName=supervisor_info.firstName,
+                lastName=supervisor_info.lastName,
+                username=supervisor_info.username,
+                email=supervisor_info.email,
+                university=supervisor_info.university,
+                department=supervisor_info.department
+            )
+        
+        # Build final response
+        response = schemas.TeamProjectResponse(
+            team_id=team.id,
+            team_name=team.name,
+            project=project_details,
+            supervisor_info=supervisor_response,
+            team_members=team_members
+        )
+        
+        return response
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error in get_team_project_by_title: {str(e)}")
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Failed to retrieve team project: {str(e)}"
+        )
+
+
 
 @router.get("/v1/archive/{title}", response_model=schemas.ProjectsResponse)
 @router.get("/v1/archive", response_model=list[schemas.ProjectsResponse])
@@ -776,108 +924,4 @@ async def create_college_idea_request(
         db.rollback()
         logger.error(f"Unexpected error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to create request: {str(e)}")
-
-
-# @router.get("/v1/team-projects/{title}", response_model=schemas.TeamProjectResponse)
-# async def get_team_project_by_title(
-#     title: str,
-#     current_user: Union[schemas.UserDB, schemas.AdminDB, schemas.SupervisorDB] = Depends(auth.get_current_any_user),
-#     db: Session = Depends(get_db)
-# ):
-#     try:
-#         query = db.query(
-#             Team.id.label("team_id"),
-#             Team.name.label("team_name"),
-#             TeamProject.id.label("project_id"),
-#             TeamProject.title.label("project_title"),
-#             TeamProject.description.label("project_description"),
-#             TeamProject.year.label("project_year"),
-#             TeamProject.maxSimScore.label("project_maxSimScore"),
-#             TeamProject.status.label("project_status"),
-#             TeamProject.created_at.label("project_created_at"),
-#             Supervisors.id.label("supervisor_id"),
-#             Supervisors.firstName.label("supervisor_firstName"),
-#             Supervisors.lastName.label("supervisor_lastName"),
-#             Supervisors.username.label("supervisor_username"),
-#             Supervisors.email.label("supervisor_email"),
-#             Supervisors.university.label("supervisor_university"),
-#             Supervisors.department.label("supervisor_department"),
-#             User.firstName.label("member_firstName"),
-#             User.lastName.label("member_lastName"),
-#             User.email.label("member_email"),
-#             TeamMember.role.label("member_role"),
-#             TeamMember.is_leader.label("member_is_leader"),
-#             TeamMember.joined_at.label("member_joined_at")
-#         ).join(
-#             TeamProject,
-#             Team.id == TeamProject.team_id
-#         ).join(
-#             CollegeIdeasRequests,
-#             (Team.id == CollegeIdeasRequests.team_id) & (CollegeIdeasRequests.status == reqStatus.ACCEPTED)
-#         ).join(
-#             CollegeIdeas,
-#             CollegeIdeasRequests.college_idea_title == CollegeIdeas.title
-#         ).join(
-#             Supervisors,
-#             CollegeIdeas.supervisor_username == Supervisors.username
-#         ).outerjoin(
-#             TeamMember,
-#             Team.id == TeamMember.team_id
-#         ).outerjoin(
-#             User,
-#             TeamMember.username == User.username
-#         ).filter(
-#             TeamProject.title == title
-#         )
-
-#         results = query.all()
-#         if not results:
-#             raise HTTPException(status_code=404, detail=f"Team project with title '{title}' not found")
-
-#         # Aggregate data
-#         team_data = {
-#             "team_id": results[0].team_id,
-#             "team_name": results[0].team_name,
-#             "project": {
-#                 "id": results[0].project_id,
-#                 "title": results[0].project_title,
-#                 "description": results[0].project_description,
-#                 "year": results[0].project_year,
-#                 "maxSimScore": results[0].project_maxSimScore,
-#                 "status": results[0].project_status,
-#                 "created_at": results[0].project_created_at
-#             },
-#             "supervisor_info": schemas.SupervisorResponse(
-#                 id=results[0].supervisor_id,
-#                 firstName=results[0].supervisor_firstName,
-#                 lastName=results[0].supervisor_lastName,
-#                 username=results[0].supervisor_username,
-#                 email=results[0].supervisor_email,
-#                 university=results[0].supervisor_university,
-#                 department=results[0].supervisor_department
-#             ),
-#             "team_members": []
-#         }
-
-#         # Collect team members
-#         member_set = set()  # Avoid duplicates
-#         for row in results:
-#             if row.member_email and row.member_email not in member_set:
-#                 team_data["team_members"].append(
-#                     schemas.TeamMemberDetailed(
-#                         firstName=row.member_firstName,
-#                         lastName=row.member_lastName,
-#                         email=row.member_email,
-#                         role=row.member_role,
-#                         is_leader=row.member_is_leader,
-#                         joined_at=row.member_joined_at
-#                     )
-#                 )
-#                 member_set.add(row.member_email)
-
-#         return schemas.TeamProjectResponse(**team_data)
-
-#     except Exception as e:
-#         logger.error(f"Unexpected error: {str(e)}")
-#         raise HTTPException(status_code=500, detail=f"Failed to retrieve team project: {str(e)}")
 

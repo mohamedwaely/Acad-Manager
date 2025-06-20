@@ -262,15 +262,25 @@ class TeamMemberDetailed(BaseModel):
     class Config:
         from_attributes = True
 
+class TeamProjectsResponse(BaseModel):
+    team_project_id: int
+    title: str
+    status: str
+
+    class Config:
+        from_attributes = True
+
+
 class TeamProjectResponse(BaseModel):
     team_id: int
     team_name: str
     project: dict  # Contains id, title, description, year, maxSimScore, status, created_at
-    supervisor_info: SupervisorResponse
+    supervisor_info: Optional[SupervisorResponse] = None  # Make this optional
     team_members: List[TeamMemberDetailed]
 
     class Config:
         from_attributes = True
+
 
 class RecommendedTeam(BaseModel):
     team_id: int
@@ -278,7 +288,7 @@ class RecommendedTeam(BaseModel):
     description: str
     skills: List[str]
     similarity_score: float
-    
+
     class Config:
         from_attributes = True
 
