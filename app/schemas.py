@@ -255,7 +255,7 @@ class TeamMemberDetailed(BaseModel):
     firstName: str
     lastName: str
     email: EmailStr
-    role: Optional[str]
+    title: Optional[str]
     is_leader: bool
     joined_at: datetime
 

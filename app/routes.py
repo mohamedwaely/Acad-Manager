@@ -591,11 +591,11 @@ async def get_team_project_by_title(
         team_members = []
         for team_member, user in team_members_query:
             team_members.append(
-                schemas.TeamMemberResponse(
+                schemas.TeamMemberDetailed(
                     firstName=user.firstName,
                     lastName=user.lastName,
                     email=user.email,
-                    role=team_member.role,
+                    title=user.title,
                     is_leader=team_member.is_leader,
                     joined_at=team_member.joined_at
                 )
