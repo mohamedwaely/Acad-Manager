@@ -501,7 +501,6 @@ async def add_admin(admin_data: schemas.Admin, db: Session = Depends(get_db)):
 
 @router.get("/v1/team-ideas", response_model=List[schemas.TeamProjectsResponse])
 async def get_teams(
-    current_user: Union[schemas.UserDB, schemas.AdminDB, schemas.SupervisorDB] = Depends(auth.get_current_any_user),
     db: Session = Depends(get_db)
 ):
     try:
@@ -540,7 +539,6 @@ async def get_teams(
 @router.get("/v1/team-ideas/{title}", response_model=schemas.TeamProjectResponse)
 async def get_team_project_by_title(
     title: str,
-    current_user: Union[schemas.UserDB, schemas.AdminDB, schemas.SupervisorDB] = Depends(auth.get_current_any_user),
     db: Session = Depends(get_db)
 ):
     try:
