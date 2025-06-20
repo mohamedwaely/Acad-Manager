@@ -68,6 +68,86 @@ async def add_project_idea(
             detail=f"Internal server error: {str(e)}"
         )
 
+@router.get('/v1/student/recommef-for-me', response_model=schemas.RecommendedTeams)
+async def recommend_teams(cur_user: schemas.UserDB = Depends(auth.getCurrentUser), db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.email == cur_user.email).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    dbteams = db.query(models.Team).all()
+
+    teams = [
+        {
+            "id": str(team.id),
+            "title": team.name,
+            "skills": ", ".join(team.expec_tools) if team.expec_tools else ""
+        }
+        for team in dbteams
+    ]
+
+    student_info = {
+        "id": str(user.id),
+        "jobtitle": user.title,
+        "skills": ", ".join(user.skills) if user.skills else ""
+    }
+
+
+    payload = {
+        "student": student_info,
+        "projects": teams
+    }
+
+    external_api_url = 'https://recommendation-system-production-390d.up.railway.app/v1/match/student-to-projects'
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(external_api_url, json=payload, headers=headers, timeout=10.0)
+            response.raise_for_status()  # Raise exception for 4xx/5xx responses
+            api_response = response.json()
+    except httpx.RequestError as e:
+        logger.error(f"Failed to connect to external API: {str(e)}")
+        raise HTTPException(status_code=503, detail="External recommendation service unavailable")
+    except httpx.HTTPStatusError as e:
+        logger.error(f"External API error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"External API error: {e.response.status_code}")
+    except ValueError as e:
+        logger.error(f"Invalid response from external API: {str(e)}")
+        raise HTTPException(status_code=500, detail="Invalid response from external API")
+
+    matches = api_response.get("matches", [])
+    
+    recommended_team_ids = [int(match["project_id"]) for match in matches]
+    
+    recommended_team_from_db = db.query(models.Team).filter(
+        models.Team.id.in_(recommended_team_ids)
+    ).all()
+    
+    team_map = {team.id: team for team in recommended_team_from_db}
+    
+    recommended_teams = []
+    for match in matches:
+        team_id = int(match["project_id"])
+        if team_id in team_map:
+            team = team_map[team_id]
+            recommended_teams.append(
+                schemas.RecommendedTeam(
+                    team_id=team.id,
+                    team_name=team.name,
+                    team_description=team.description,
+                    skills = team.expec_tools,
+                    similarity_score=match["similarity_score"]
+                )
+            )
+
+    return schemas.RecommendedTeams(
+        matches=recommended_teams,
+        total_teams=len(recommended_teams)
+    )
+
+
 
 
 @router.get('/v1/team/recommend-for-us', response_model=schemas.RecommendedUsers)
@@ -99,7 +179,7 @@ async def recommend_users(cur_user: schemas.UserDB = Depends(auth.getCurrentUser
     students = [
         {
             "id": str(user.id),
-            "jobtitle": leader.role or "Team Member", 
+            "jobtitle": user.title if user.title else "developer", 
             "skills": ", ".join(user.skills) if user.skills else ""
         }
         for user in users

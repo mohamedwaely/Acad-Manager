@@ -3,6 +3,7 @@ from pydantic import BaseModel, EmailStr, validator
 from typing import List, Optional
 from datetime import datetime
 from app.models import reqStatus
+from controllers import similarity_scores
 
 class Supervisor(BaseModel):
     username: str
@@ -62,6 +63,7 @@ class UserBase(BaseModel):
     firstName: str
     lastName: str
     skills: Optional[List[str]] = []
+    title: Optional[str] = None
 
     @validator('firstName', 'lastName')
     def name_valid(cls, v):
@@ -70,13 +72,6 @@ class UserBase(BaseModel):
         if len(v) < 2:
             raise ValueError(f'Name {v} must be at least 2 characters long')
         return v
-
-class recommended_users(BaseModel):
-    username: str
-    email: EmailStr
-    firstName: str
-    lastName: str
-    skills: List[str] = []
 
 class User(UserBase):
     password: str
@@ -277,11 +272,29 @@ class TeamProjectResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class RecommendedTeam(BaseModel):
+    team_id: int
+    name: str
+    description: str
+    skills: List[str]
+
+    similarity_score: float
+    class Config:
+        from_attributes = True
+
+class RecommendedTeams(BaseModel):
+    matches: List[RecommendedTeam]
+    total_teams: int
+
+    class Config:
+        from_attributes = True
+
 class RecommendedUser(BaseModel):
     user_id: int
     username: str
     firstName: str
     lastName: str
+    title: str
     skills: List[str]
     similarity_score: float
 
