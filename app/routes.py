@@ -857,6 +857,52 @@ async def create_team(team: schemas.TeamBase, cur_user: schemas.UserDB = Depends
         raise HTTPException(status_code=500, detail=f"Failed to create team: {str(e)}")
 
 
+@router.get("/v1/college-ideas/{id}", response_model=schemas.CollegeIdeaResponse)
+async def college_idea(id: int, db: Session = Depends(get_db)):
+    try:
+        query = db.query(
+            models.CollegeIdeas.title,
+            models.CollegeIdeas.description,
+            models.CollegeIdeas.year,
+            models.CollegeIdeas.status,
+            models.Supervisors.id,
+            models.Supervisors.firstName,
+            models.Supervisors.lastName,
+            models.Supervisors.username,
+            models.Supervisors.email,
+            models.Supervisors.university,
+            models.Supervisors.department
+        ).join(
+            models.Supervisors,
+            models.CollegeIdeas.supervisor_email == models.Supervisors.email
+        )
+
+        def map_idea(idea):
+            return {
+                "title": idea.title,
+                "description": idea.description,
+                "year": idea.year,
+                "status": idea.status,
+                "supervisor_info": {
+                    "id": idea.id,
+                    "firstName": idea.firstName,
+                    "lastName": idea.lastName,
+                    "username": idea.username,
+                    "email": idea.email,
+                    "university": idea.university,
+                    "department": idea.department
+                }
+            }
+
+        
+        idea = query.filter(models.CollegeIdeas.id == id).first()
+        if idea is None:
+            raise HTTPException(status_code=404, detail=f"College idea with title '{id}' not found")
+        return map_idea(idea)
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve college ideas: {str(e)}")
+
 @router.get("/v1/college-ideas/{title}", response_model=schemas.CollegeIdeaResponse)
 @router.get("/v1/college-ideas", response_model=list[schemas.CollegeIdeaResponse])
 async def college_idea(title: Optional[str] = None, db: Session = Depends(get_db)):
