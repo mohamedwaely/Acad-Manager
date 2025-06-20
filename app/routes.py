@@ -644,6 +644,53 @@ async def get_team_project_by_title(
             detail=f"Failed to retrieve team project: {str(e)}"
         )
 
+@router.get("/v1/archive/{id}", response_model=schemas.ProjectsResponse)
+async def get_project_by_id(id: int, db: Session = Depends(get_db)):
+    try:
+        query = db.query(
+            models.Project.id,
+            models.Project.title,
+            models.Project.description,
+            models.Project.tools,
+            models.Project.supervisor,
+            models.Project.year,
+            models.ProjectTeamMember.firstName,
+            models.ProjectTeamMember.lastName,
+            models.ProjectTeamMember.email,
+            models.ProjectTeamMember.role,
+            models.ProjectTeamMember.is_leader
+        ).outerjoin(
+            models.ProjectTeamMember,
+            models.ProjectTeamMember.project_id == models.Project.id
+        )
+
+        
+        projects = query.filter(models.Project.id == id).all()
+        if not projects:
+            raise HTTPException(status_code=404, detail=f"Project with id '{id}' not found")
+        result = {
+            "id": projects[0].id,
+            "title": projects[0].title,
+            "description": projects[0].description,
+            "tools": projects[0].tools.split(),
+            "supervisor": projects[0].supervisor,
+            "year": projects[0].year,
+            "team_members": [
+                schemas.TeamMemberBase(
+                    firstName=proj.firstName,
+                    lastName=proj.lastName,
+                    email=proj.email,
+                    role=proj.role,
+                    is_leader=proj.is_leader
+                )
+                for proj in projects if proj.email
+            ]
+        }
+        return result
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get projects: {str(e)}")
+
 
 
 @router.get("/v1/archive/{title}", response_model=schemas.ProjectsResponse)
