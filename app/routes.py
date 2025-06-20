@@ -861,6 +861,7 @@ async def create_team(team: schemas.TeamBase, cur_user: schemas.UserDB = Depends
 async def college_idea(id: int, db: Session = Depends(get_db)):
     try:
         query = db.query(
+            models.collegeIdeas.id,
             models.CollegeIdeas.title,
             models.CollegeIdeas.description,
             models.CollegeIdeas.year,
@@ -879,6 +880,7 @@ async def college_idea(id: int, db: Session = Depends(get_db)):
 
         def map_idea(idea):
             return {
+                "id": idea.id,
                 "title": idea.title,
                 "description": idea.description,
                 "year": idea.year,
@@ -908,6 +910,7 @@ async def college_idea(id: int, db: Session = Depends(get_db)):
 async def college_idea(title: Optional[str] = None, db: Session = Depends(get_db)):
     try:
         query = db.query(
+            models.collegeIdeas.id,
             models.CollegeIdeas.title,
             models.CollegeIdeas.description,
             models.CollegeIdeas.year,
@@ -926,6 +929,7 @@ async def college_idea(title: Optional[str] = None, db: Session = Depends(get_db
 
         def map_idea(idea):
             return {
+                "id": idea.id,
                 "title": idea.title,
                 "description": idea.description,
                 "year": idea.year,

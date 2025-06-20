@@ -221,6 +221,7 @@ class CollegeIdeaBase(BaseModel):
         return v
 
 class CollegeIdeaResponse(BaseModel):
+    id: int
     title: str
     description: str
     year: int
