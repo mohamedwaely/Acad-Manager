@@ -886,7 +886,7 @@ async def college_idea_by_id(id: int, db: Session = Depends(get_db)):
                 "year": idea.year,
                 "status": idea.status,
                 "supervisor_info": {
-                    "id": idea.id,
+                    "id": idea[5],
                     "firstName": idea.firstName,
                     "lastName": idea.lastName,
                     "username": idea.username,
@@ -935,7 +935,7 @@ async def college_idea(title: Optional[str] = None, db: Session = Depends(get_db
                 "year": idea.year,
                 "status": idea.status,
                 "supervisor_info": {
-                    "id": idea.id,
+                    "id": idea[5],
                     "firstName": idea.firstName,
                     "lastName": idea.lastName,
                     "username": idea.username,
