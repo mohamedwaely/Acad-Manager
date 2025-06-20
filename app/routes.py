@@ -565,16 +565,16 @@ async def get_team_project_by_title(
             )
         
         # Get supervisor information through college ideas requests
-        supervisor_info = None
-        college_request = db.query(models.CollegeIdeasRequests).filter(
-            models.CollegeIdeasRequests.team_id == team.id,
-            models.CollegeIdeasRequests.status != reqStatus.REJECTED
-        ).first()
+        # supervisor_info = None
+        # college_request = db.query(models.CollegeIdeasRequests).filter(
+        #     models.CollegeIdeasRequests.team_id == team.id,
+        #     models.CollegeIdeasRequests.status != reqStatus.REJECTED
+        # ).first()
         
-        if college_request:
-            supervisor_info = db.query(models.Supervisors).filter(
-                models.Supervisors.email == college_request.supervisor_email
-            ).first()
+        # if college_request:
+        #     supervisor_info = db.query(models.Supervisors).filter(
+        #         models.Supervisors.email == college_request.supervisor_email
+        #     ).first()
         
         # Get team members with their user details
         team_members_query = db.query(
@@ -591,11 +591,11 @@ async def get_team_project_by_title(
         team_members = []
         for team_member, user in team_members_query:
             team_members.append(
-                schemas.TeamMemberDetailed(
+                schemas.TeamMemberResponse(
                     firstName=user.firstName,
                     lastName=user.lastName,
                     email=user.email,
-                    title=user.title,
+                    role=team_member.role,
                     is_leader=team_member.is_leader,
                     joined_at=team_member.joined_at
                 )
@@ -612,25 +612,24 @@ async def get_team_project_by_title(
             "created_at": team_project.created_at
         }
         
-        # Build supervisor response if available
-        supervisor_response = None
-        if supervisor_info:
-            supervisor_response = schemas.SupervisorResponse(
-                id=supervisor_info.id,
-                firstName=supervisor_info.firstName,
-                lastName=supervisor_info.lastName,
-                username=supervisor_info.username,
-                email=supervisor_info.email,
-                university=supervisor_info.university,
-                department=supervisor_info.department
-            )
+        # # Build supervisor response if available
+        # supervisor_response = None
+        # if supervisor_info:
+        #     supervisor_response = schemas.SupervisorResponse(
+        #         id=supervisor_info.id,
+        #         firstName=supervisor_info.firstName,
+        #         lastName=supervisor_info.lastName,
+        #         username=supervisor_info.username,
+        #         email=supervisor_info.email,
+        #         university=supervisor_info.university,
+        #         department=supervisor_info.department
+        #     )
         
         # Build final response
         response = schemas.TeamProjectResponse(
             team_id=team.id,
             team_name=team.name,
             project=project_details,
-            supervisor_info=supervisor_response,
             team_members=team_members
         )
         
