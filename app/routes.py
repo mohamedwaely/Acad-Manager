@@ -858,10 +858,10 @@ async def create_team(team: schemas.TeamBase, cur_user: schemas.UserDB = Depends
 
 
 @router.get("/v1/college-ideas/{id}", response_model=schemas.CollegeIdeaResponse)
-async def college_idea(id: int, db: Session = Depends(get_db)):
+async def college_idea_by_id(id: int, db: Session = Depends(get_db)):
     try:
         query = db.query(
-            models.collegeIdeas.id,
+            models.CollegeIdeas.id,
             models.CollegeIdeas.title,
             models.CollegeIdeas.description,
             models.CollegeIdeas.year,
@@ -910,7 +910,7 @@ async def college_idea(id: int, db: Session = Depends(get_db)):
 async def college_idea(title: Optional[str] = None, db: Session = Depends(get_db)):
     try:
         query = db.query(
-            models.collegeIdeas.id,
+            models.CollegeIdeas.id,
             models.CollegeIdeas.title,
             models.CollegeIdeas.description,
             models.CollegeIdeas.year,
