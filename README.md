@@ -1,93 +1,155 @@
-# Acad-Manager
-The Project Management API is a component of a comprehensive Graduation Project Management System designed to streamline the process of managing graduation projects in colleges. This system facilitates collaboration among three user types—Admins, Supervisors, and Students—from team creation to project submission. The API provides core functionalities such as user authentication, project and team management, similarity checks for project ideas, and recommendation systems for team and student matching.
+# Acad-Manager 🎓
+### Comprehensive Graduation Project Management System
 
-## Badges
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.68.0-blue.svg)](https://fastapi.tiangolo.com/)
+[![React.js](https://img.shields.io/badge/React.js-18.0+-blue.svg)](https://reactjs.org/)
+[![Flutter](https://img.shields.io/badge/Flutter-3.0+-blue.svg)](https://flutter.dev/)
+[![Laravel](https://img.shields.io/badge/Laravel-9.0+-blue.svg)](https://laravel.com/)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-blue.svg)](https://www.mysql.com/)
-[![Git](https://img.shields.io/badge/Git-2.33+-blue.svg)](https://git-scm.com/)
 [![JWT](https://img.shields.io/badge/JWT-Auth-blue.svg)](https://jwt.io/)
-[![bcrypt](https://img.shields.io/badge/bcrypt-3.2.0-blue.svg)](https://pypi.org/project/bcrypt/)
 [![TF-IDF](https://img.shields.io/badge/TF--IDF-Similarity-blue.svg)](https://en.wikipedia.org/wiki/Tf%E2%80%93idf)
+[![bcrypt](https://img.shields.io/badge/bcrypt-3.2.0-blue.svg)](https://pypi.org/project/bcrypt/)
+[![PHP](https://img.shields.io/badge/PHP-8.0+-blue.svg)](https://www.php.net/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-blue.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.0+-blue.svg)](https://tailwindcss.com/)
+[![Dart](https://img.shields.io/badge/Dart-2.17+-blue.svg)](https://dart.dev/)
+[![Gemini](https://img.shields.io/badge/Gemini-API-blue.svg)](https://ai.google.dev/gemini-api)
+[![Git](https://img.shields.io/badge/Git-2.33+-blue.svg)](https://git-scm.com/)
 
-## video demo
-[video](https://drive.google.com/file/d/1lLzJWSNxQpqYcVwbgBHjs13liTdWQ4Q9/view?pli=1)
+## 📖 Overview
 
-## screenshots
-![login](./imgs/login.png)
-![dashboard](./imgs/dashboard.png)
-![dashboard](./imgs/dashboard-2.png)
-![archive](./imgs/archive.png)
-![supervisors-ideas](./imgs/supervisors_ideas.png)
-![team-ideas](./imgs/team-ideas.png)
-![create-team](./imgs/create-team.png)
-![teams](./imgs/teams.png)
-![tasks](./imgs/tasks.png)
-![chat](./imgs/chat.png)
-![chat-response](./imgs/chat-response.png)
-![recommend-for-student](./imgs/recommend-for-student.png)
-![recomend-for-team](./imgs/recommend-for-team.png)
+Acad-Manager is a comprehensive graduation project management system designed to streamline the entire lifecycle of academic projects in colleges. The platform facilitates seamless collaboration between three key user types: **Admins**, **Supervisors**, and **Students**, from initial team formation to final project submission.
 
-## Features
-### User Authentication:
-JWT-based authentication for Students, Supervisors, and Admins.
-Role-based access control for different user types.
-Secure password hashing using bcrypt.
+The system leverages advanced technologies including machine learning for similarity detection, intelligent recommendation algorithms, and modern web/mobile frameworks to provide an intuitive and efficient project management experience.
 
-### Team Management:
-Students can create teams and invite members.
-Team leaders can propose project ideas and request college ideas from supervisors.
-Integration with an external recommendation system to suggest teams for students and students for teams based on skills and project requirements.
+## ✨ Key Features
 
-### Project Management:
-Admins can upload projects with associated team members.
-Team leaders can submit project ideas, which are checked for similarity against existing projects, college ideas, and team projects.
-Similarity checks use TF-IDF and cosine similarity to ensure originality.
+### 🔐 Authentication & Authorization
+- **JWT-based Authentication**: Secure token-based authentication system
+- **Role-based Access Control**: Differentiated permissions for Admins, Supervisors, and Students
+- **Password Security**: Industry-standard bcrypt hashing for password protection
 
-### College Ideas:
-Supervisors can propose college ideas for student teams to adopt.
-Students can request to work on these ideas, with status tracking (Pending, Accepted, Rejected).
+### 👥 Team Management
+- **Team Creation**: Students can form teams and invite members
+- **Project Proposals**: Team leaders can submit and manage project ideas
+- **Smart Recommendations**: AI-powered matching system for students and teams based on skills and requirements
+- **College Ideas Integration**: Access to supervisor-proposed project concepts
 
-### Recommendation System:
-Matches students to teams and teams to students based on skills and project requirements using an external API.
-Returns similarity scores to guide decision-making.
+### 📋 Project Management
+- **Project Lifecycle Tracking**: Complete oversight from conception to completion
+- **Similarity Detection**: Advanced TF-IDF and cosine similarity algorithms to ensure project originality
+- **Idea Validation**: Automatic checking against existing projects and college databases
+- **Status Management**: Real-time tracking of project approval status
 
-### Database Integration:
-MySQL database with SQLAlchemy ORM for managing users, teams, projects, and college ideas.
-Robust schema design with relationships and constraints for data integrity.
+### 💡 College Ideas System
+- **Supervisor Proposals**: Faculty can submit project ideas for student adoption
+- **Request Management**: Students can apply for college-proposed projects
+- **Status Tracking**: Comprehensive monitoring of application states (Pending, Accepted, Rejected)
+
+### 🎯 Intelligent Recommendations
+- **Student-Team Matching**: Algorithm-based suggestions for optimal team compositions
+- **Skill-based Pairing**: Matching based on complementary skills and project requirements
+- **Similarity Scoring**: Quantitative metrics to guide decision-making
+
+### 📝 Task Management
+- **Task Assignment**: Supervisors can create and distribute tasks
+- **Submission System**: Students can upload and manage task responses
+- **Progress Tracking**: Real-time monitoring of task completion status
+
+### 🤖 AI-Powered Chatbot
+- **Project Support**: Intelligent assistance for project-related queries
+- **Idea Generation**: AI-driven project idea recommendations
+- **24/7 Availability**: Round-the-clock support for students and teams
+
+## 🛠️ Technology Stack
+
+### Backend Technologies
+- **Python 3.9+** - Core backend development
+- **FastAPI** - High-performance API framework
+- **Flask** - Lightweight web framework
+- **SQLAlchemy** - Database ORM
+- **MySQL 8.0** - Primary database
+- **Scikit-learn** - Machine learning algorithms
+- **JWT** - Authentication tokens
+- **bcrypt** - Password hashing
+- **PHP 8.0+** - Server-side scripting
+- **Laravel 11.0** - PHP web framework
+
+### Frontend Technologies
+- **React.js 18.0+** - Web frontend framework
+- **JavaScript ES6+** - Client-side scripting
+- **Tailwind CSS 3.0+** - Utility-first CSS framework
+
+### Mobile Development
+- **Flutter 3.0+** - Cross-platform mobile framework
+- **Dart 2.17+** - Mobile app programming language
+
+### Additional Technologies
+- **Gemini API** - AI integration
+- **Git** - Version control
+- **Postman** - API testing
+
+## 🎥 Demo
+
+Experience Acad-Manager in action: [Watch Demo Video](https://drive.google.com/file/d/1lLzJWSNxQpqYcVwbgBHjs13liTdWQ4Q9/view?pli=1)
+
+## 📸 Screenshots
+
+### Authentication & Dashboard
+<div align="center">
+  <img src="./imgs/login.png" alt="Login Interface" width="400"/>
+  <img src="./imgs/dashboard.png" alt="Main Dashboard" width="400"/>
+  <img src="./imgs/dashboard-2.png" alt="Analytics Dashboard" width="400"/>
+</div>
+
+### Project Management
+<div align="center">
+  <img src="./imgs/supervisors_ideas.png" alt="Supervisor Ideas" width="400"/>
+  <img src="./imgs/team-ideas.png" alt="Team Ideas" width="400"/>
+  <img src="./imgs/archive.png" alt="Archive" width="400"/>
+</div>
+
+### Team Collaboration
+<div align="center">
+  <img src="./imgs/create-team.png" alt="Team Creation" width="400"/>
+  <img src="./imgs/teams.png" alt="Teams Overview" width="400"/>
+</div>
 
 ### Task Management
-Supervisor can upload, delete the tasks
-Students can upload, delete the task answers
+<div align="center">
+  <img src="./imgs/tasks.png" alt="Task Management" width="400"/>
+</div>
 
 ### Chatbot
-This will be a support for students to help them manage the project.
-Also will recommend Project Ideas for the teams
+<div align="center">
+  <img src="./imgs/chat.png" alt="Chat Interface" width="400"/>
+  <img src="./imgs/chat-response.png" alt="Chat response" width="400"/>
+</div>
 
+### Recommendations
+<div align="center">
+  <img src="./imgs/recommend-for-student.png" alt="Student Recommendations" width="400"/>
+  <img src="./imgs/recomend-for-team.png" alt="Team Recommendations" width="400"/>
+</div>
 
-### Tech/Frameworks Used
-Python
-FastAPI
-Flask
-Scikit-learn
-MySQL with SQLAlchemy ORM
-JWT
-React.js
-JavaScript
-Flutter
-Dart
-PHP
-Laravel
-Git
-Postman
+## 🚀 Getting Started
 
-## Contributers
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/acad-manager.git
+   cd acad-manager
+   cd backend && python main.py
+
+## Development Team
+@AbdelrahmaAreef
 @AhmedAbdelhadyISmail
 @mansour3432
 @mohamedwaely
 @AmiraAbdEl-Rahman
+@FathySaid
 @MostafaHikal
 @MohamedKandil
 @BasmalaAbu-zaid
-@AbdelrahmaAreef
-@FathySaid
