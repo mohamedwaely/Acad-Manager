@@ -3,7 +3,6 @@ from pydantic import BaseModel, EmailStr, validator
 from typing import List, Optional
 from datetime import datetime
 from app.models import reqStatus
-from controllers import similarity_scores
 
 class Supervisor(BaseModel):
     username: str
