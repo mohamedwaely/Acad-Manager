@@ -90,6 +90,10 @@ The system leverages advanced technologies including machine learning for simila
 - **Git** - Version control
 - **Postman** - API testing
 
+## 💡API Documentation
+
+Experience Acad-Manager in action: [API Documentation](https://www.postman.com/capstone-ii/capstone-ii-p/collection/yecd8ka/capstone-ii?action=share&creator=27428449)
+
 ## 🎥 Demo
 
 Experience Acad-Manager in action: [Watch Demo Video](https://drive.google.com/file/d/1lLzJWSNxQpqYcVwbgBHjs13liTdWQ4Q9/view?pli=1)
